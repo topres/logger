@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Linq;
 using System.Threading;
 
@@ -15,11 +16,13 @@ namespace CodeTest.Logger
         private bool _shouldExitWithFlush;
 
         private bool ShouldProcess => _shouldExit == false && _shouldExitWithFlush == false;
+
+        public event Action<Exception> OnException;
         
         public AsyncLogger(ILogWriter logWriter)
         {
             _logWriter = logWriter;
-            _processorThread = new Thread(PendingLogProcessor);
+            _processorThread = new Thread(() => ExceptionHandler(PendingLogProcessor));
             _processorThread.Start();
         }
 
@@ -29,6 +32,18 @@ namespace CodeTest.Logger
             return new AsyncLogger(logWriter);
         }
 
+        private void ExceptionHandler(Action processor)
+        {
+            try
+            {
+                processor();
+            }
+            catch (Exception e)
+            {
+                OnException?.Invoke(e);
+            }
+        }
+        
         private void PendingLogProcessor()
         {
             while (ShouldProcess)
@@ -40,7 +55,6 @@ namespace CodeTest.Logger
                         if(_pendingLogs.TryDequeue(out var log))
                         {
                             _logWriter.WriteLog(log);
-                            Console.WriteLine("log: " + log.Text);
                         }
                     }
 

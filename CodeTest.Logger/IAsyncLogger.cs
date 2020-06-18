@@ -1,7 +1,14 @@
-﻿namespace CodeTest.Logger
+﻿using System;
+
+namespace CodeTest.Logger
 {
     public interface IAsyncLogger
     {
+        /// <summary>
+        /// Subscribe to any exceptions that occurs in the processor.
+        /// </summary>
+        event Action<Exception> OnException;
+        
         /// <summary>
         /// Stop the logging. Any pending logs that have not yet been logged to disk, will be lost.
         /// </summary>

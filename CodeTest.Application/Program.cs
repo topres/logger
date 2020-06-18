@@ -10,15 +10,16 @@ namespace CodeTest.Application
         {
             LogWithFlushing();
             await LogWithoutFlushing();
-            await Task.CompletedTask;
 
-            Console.WriteLine("Completed");
+            Console.WriteLine("Terminated.");
         }
 
         private static void LogWithFlushing()
         {
             var settings = new LogSettings(logPath: $"tmp/logs", logFileName: "log-with-flushing");
             IAsyncLogger logger = AsyncLogger.Initialize(settings);
+
+            logger.OnException += ex => Console.WriteLine("Logger exception: " + ex.Message);
 
             for (int i = 0; i < 15; i++)
             {
@@ -32,6 +33,8 @@ namespace CodeTest.Application
         {
             var settings = new LogSettings(logPath: $"tmp/logs", logFileName: "log-without-flushing");
             IAsyncLogger logger = AsyncLogger.Initialize(settings);
+            
+            logger.OnException += ex => Console.WriteLine("Logger exception: " + ex.Message);
 
             for (int i = 50; i > 0; i--)
             {

@@ -1,5 +1,0 @@
-/Users/cnha/Downloads/MobilePayIT-RecruitingTask/LogComponent/bin/Debug/LogComponent.dll
-/Users/cnha/Downloads/MobilePayIT-RecruitingTask/LogComponent/bin/Debug/LogComponent.pdb
-/Users/cnha/Downloads/MobilePayIT-RecruitingTask/LogComponent/obj/Debug/LogComponent.csprojAssemblyReference.cache
-/Users/cnha/Downloads/MobilePayIT-RecruitingTask/LogComponent/obj/Debug/LogComponent.dll
-/Users/cnha/Downloads/MobilePayIT-RecruitingTask/LogComponent/obj/Debug/LogComponent.pdb

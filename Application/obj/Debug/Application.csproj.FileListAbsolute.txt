@@ -1,0 +1,9 @@
+/Users/cnha/Downloads/MobilePayIT-RecruitingTask/Application/bin/Debug/Application.exe.config
+/Users/cnha/Downloads/MobilePayIT-RecruitingTask/Application/bin/Debug/Application.exe
+/Users/cnha/Downloads/MobilePayIT-RecruitingTask/Application/bin/Debug/Application.pdb
+/Users/cnha/Downloads/MobilePayIT-RecruitingTask/Application/bin/Debug/LogComponent.dll
+/Users/cnha/Downloads/MobilePayIT-RecruitingTask/Application/bin/Debug/LogComponent.pdb
+/Users/cnha/Downloads/MobilePayIT-RecruitingTask/Application/obj/Debug/Application.csprojAssemblyReference.cache
+/Users/cnha/Downloads/MobilePayIT-RecruitingTask/Application/obj/Debug/Application.csproj.CopyComplete
+/Users/cnha/Downloads/MobilePayIT-RecruitingTask/Application/obj/Debug/Application.exe
+/Users/cnha/Downloads/MobilePayIT-RecruitingTask/Application/obj/Debug/Application.pdb

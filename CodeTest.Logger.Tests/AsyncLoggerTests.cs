@@ -8,17 +8,12 @@ namespace CodeTest.Logger.Tests
 {
     public class AsyncLoggerTests
     {
-        public AsyncLoggerTests()
-        {
-        }
-        
-        
         [Fact]
         public void WriteLog_will_result_in_files_being_written_to_disk()
         {
             var dir = "tmp/logs/c13d3e35-e4b8-4ae7-ac97-06bfd1d8f275";
             
-            CleanDirectory(dir);
+            FileSystemHelper.EmptyDirectory(dir);
 
             var logger = AsyncLogger.Initialize(new LogSettings(dir, "log"));
             
@@ -26,13 +21,16 @@ namespace CodeTest.Logger.Tests
             logger.WriteLog("baz");
             logger.StopWithFlush();
 
-            var fileName = "log-" + DateTimeHelper.CurrentDanishTime().ToString("yyyyMMdd") + ".log";
+            var fileName = "log-" + SystemClock.CurrentDanishTime().ToString("yyyyMMdd") + ".log";
             
             var lines = File.ReadAllLines(Path.Combine(dir, fileName));
+            
+            // Expecting 3 lines, the header and the two logs we wrote
             Assert.Equal(3, lines.Length);
             
-            // check for header
-            Assert.Contains("Timestamp", lines[0]);
+            // Check that header looks correct
+            Assert.StartsWith("Timestamp", lines[0]);
+            Assert.Contains("Data", lines[0]);
             
             // check for the two logs
             Assert.Contains("bar", lines[1]);
@@ -64,49 +62,43 @@ namespace CodeTest.Logger.Tests
         [Fact]
         public void StopWithoutFlush_will_stop_processing_logs()
         {
-            var logWriter = new Mock<ILogWriter>();
-            var logger = new AsyncLogger(logWriter.Object);
+            var logWriter = new MockLogWriter();
+
+            var logger = AsyncLogger.Initialize(logWriter);
+
+            for (int i = 0; i < 50; i++)
+            {
+                logger.WriteLog("Log" + 1);
+            }
+            
+            // now we stop the processing, without flushing
+            logger.StopWithoutFlush();
+            
+            // sleep for a while then verify that not all logs have been flushed
+            Thread.Sleep(100);
+
+            int logCount = logWriter.Logs.Count;
+            
+            Assert.True(
+                logCount < 25,
+                $"Expected less than {logCount} logs to be written " +
+                $"when the logger was stopped without flushing. Actual logged: {logCount}");
+        }
+        
+        [Fact]
+        public void StopWithFlush_will_block_current_thread_until_all_messages_have_been_processed()
+        {
+            var logWriter = new MockLogWriter();
+            var logger = AsyncLogger.Initialize(logWriter);
 
             for (int i = 0; i < 20; i++)
             {
                 logger.WriteLog("Log" + 1);
             }
             
-            // initially the logger will sleep 50ms, we give it an extra 25ms to start processing, so 75ms in total
-            Thread.Sleep(75);
-            
-            // now we stop the processing, without flushing
-            logger.StopWithoutFlush();
-            
-            // sleep for a while then verify that still only one batch was processed
-            Thread.Sleep(500);
-            logWriter.Verify(e => e.WriteLog(It.IsAny<Log>()), Times.Exactly(5));
-        }
-        
-        [Fact]
-        public void StopWithFlush_will_block_current_thread_until_all_messages_have_been_processed()
-        {
-            var logWriter = new Mock<ILogWriter>();
-            var logger = new AsyncLogger(logWriter.Object);
-
-            for (int i = 0; i < 100; i++)
-            {
-                logger.WriteLog("Log" + 1);
-            }
-            
             logger.StopWithFlush();
             
-            logWriter.Verify(e => e.WriteLog(It.IsAny<Log>()), Times.Exactly(100));
-        }
-
-        private void CleanDirectory(string dir)
-        {
-            if (Directory.Exists(dir))
-            {
-                Directory.Delete(dir, true);
-            }
-            
-            Directory.CreateDirectory(dir);
+            Assert.Equal(20, logWriter.Logs.Count);
         }
     }
 }

@@ -11,7 +11,7 @@ namespace CodeTest.Application
             LogWithFlushing();
             await LogWithoutFlushing();
 
-            Console.WriteLine("Terminated.");
+            Console.WriteLine("Application completed.");
         }
 
         private static void LogWithFlushing()
@@ -36,11 +36,12 @@ namespace CodeTest.Application
             
             logger.OnException += ex => Console.WriteLine("Logger exception: " + ex.Message);
 
-            for (int i = 50; i > 0; i--)
+            for (int i = 500; i > 0; i--)
             {
                 logger.WriteLog("Number with No flush: " + i);
-                await Task.Delay(5);
             }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(2));
 
             logger.StopWithoutFlush();
         }

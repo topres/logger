@@ -15,16 +15,16 @@ namespace CodeTest.Logger
         private bool _shouldExit;
         private bool _shouldExitWithFlush;
 
-        private bool ShouldProcess => _shouldExit == false && _shouldExitWithFlush == false;
-
-        public event Action<Exception> OnException;
+        public event Action<Exception>? OnException;
         
-        public AsyncLogger(ILogWriter logWriter)
+        private AsyncLogger(ILogWriter logWriter)
         {
             _logWriter = logWriter;
             _processorThread = new Thread(() => ExceptionHandler(PendingLogProcessor));
             _processorThread.Start();
         }
+        
+        public static AsyncLogger Initialize(ILogWriter logWriter) => new AsyncLogger(logWriter);
 
         public static AsyncLogger Initialize(LogSettings settings)
         {
@@ -32,38 +32,8 @@ namespace CodeTest.Logger
             return new AsyncLogger(logWriter);
         }
 
-        private void ExceptionHandler(Action processor)
-        {
-            try
-            {
-                processor();
-            }
-            catch (Exception e)
-            {
-                OnException?.Invoke(e);
-            }
-        }
-        
-        private void PendingLogProcessor()
-        {
-            while (ShouldProcess)
-            {
-                while (_pendingLogs.Count > 0 && _shouldExit == false)
-                {
-                    for (int i = 0; i < 5; i++)
-                    {
-                        if(_pendingLogs.TryDequeue(out var log))
-                        {
-                            _logWriter.WriteLog(log);
-                        }
-                    }
-
-                    Thread.Sleep(50);
-                }
-            }
-        }
-        
         public void StopWithoutFlush() => _shouldExit = true;
+        
         public void StopWithFlush()
         {
             _shouldExitWithFlush = true;
@@ -79,8 +49,47 @@ namespace CodeTest.Logger
                 throw new InvalidOperationException("This logger has been stopped, you cannot write logs at this time.");
             }
             
-            var log = new Log(DateTimeHelper.CurrentDanishTime(), content);
+            var log = new Log(SystemClock.CurrentDanishTime(), content);
             _pendingLogs.Enqueue(log);
+        }
+        
+        private void ExceptionHandler(Action processor)
+        {
+            try
+            {
+                processor();
+            }
+            catch (Exception e)
+            {
+                OnException?.Invoke(e);
+            }
+        }
+        
+        private void PendingLogProcessor()
+        {
+            void WriteNextLog()
+            {
+                if(_pendingLogs.TryDequeue(out var log))
+                {
+                    _logWriter.WriteLog(log);
+                }
+            }
+            
+            while (_shouldExit == false && _shouldExitWithFlush == false)
+            {
+                if (_pendingLogs.Count > 0)
+                {
+                    WriteNextLog();
+                }
+            }
+
+            if (_shouldExitWithFlush)
+            {
+                while (_pendingLogs.Count > 0)
+                {
+                    WriteNextLog();
+                }
+            }
         }
     }
 }

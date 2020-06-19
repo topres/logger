@@ -16,7 +16,7 @@ namespace CodeTest.Logger
         // the time which we last created a rolling log file
         private DateTime? _lastDateTime;
         
-        private StreamWriter _writer;
+        private StreamWriter? _writer;
 
         public FileLogWriter(IClock clock, string logPath, string logFileName)
         {
@@ -34,6 +34,14 @@ namespace CodeTest.Logger
             sb.Append("\t");
             sb.Append(log.Text);
             sb.Append("\t");
+
+            if (_writer == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(_writer), 
+                    $"Expected {_writer} to be set at this point. {nameof(EnsureLogFileStreamIsCreated)} " +
+                    $"should have initialized this.");
+            }
             
             _writer.WriteLine(sb.ToString());
         }

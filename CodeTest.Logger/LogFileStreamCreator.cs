@@ -1,11 +1,10 @@
 using System.IO;
-using System.Threading;
 
 namespace CodeTest.Logger
 {
     public static class LogFileStreamCreator
     {
-        public static string Header = "Timestamp".PadRight(25, ' ') + "\t" + "Data".PadRight(15, ' ') + "\t";
+        public static string Header = "Timestamp".PadRight(24, ' ') + "Data";
 
         public static StreamWriter LogFileStream(string path, string fileName)
         {

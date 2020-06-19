@@ -33,7 +33,7 @@ namespace CodeTest.Logger.Tests
                 Assert.Equal(3, lines.Length);
             }
 
-            void AssertWritenLogsWithInitialLogFileForNextDay()
+            void AssertWrittenLogsWithInitialLogFileForNextDay()
             {
                 var time = SetupCurrentTime(01, 02);
                 writer.WriteLog(Log("log3"));
@@ -50,7 +50,7 @@ namespace CodeTest.Logger.Tests
             }
             
             AssertWrittenLogsWithNoInitialLogFile();
-            AssertWritenLogsWithInitialLogFileForNextDay();
+            AssertWrittenLogsWithInitialLogFileForNextDay();
             AssertWrittenLogsWithIncrementedMonthAndDecrementedDay();
         }
         
